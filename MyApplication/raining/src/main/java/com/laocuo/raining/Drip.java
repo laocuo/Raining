@@ -138,10 +138,10 @@ public class Drip extends View implements ValueAnimator.AnimatorUpdateListener, 
             right.x = width/2 + gap + x;
             right_x.x = width/2 + x;
         } else {
-            left.x = width/2 - height + bottom;
-            right.x = width/2 + height - bottom;
-            left_x.x = left.x;
-            right_x.x = right.x;
+            left.x = width/2 - gap + gap * (bottom - ovalH) / (height - ovalH);
+            right.x = width/2 + gap - gap * (bottom - ovalH) / (height - ovalH);
+            left_x.x = width/2;
+            right_x.x = width/2;
             left_x.y = (bottom - 2*a)/2;
             right_x.y = (bottom - 2*a)/2;
         }
