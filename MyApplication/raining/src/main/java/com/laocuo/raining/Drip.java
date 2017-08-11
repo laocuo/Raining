@@ -17,11 +17,14 @@ import android.view.View;
 
 
 public class Drip extends View implements ValueAnimator.AnimatorUpdateListener, Animator.AnimatorListener {
+    private final String TAG = "laocuo";
+
+    //默认水滴下落时间,单位毫秒
     public static final int DURATION = 1000;
 
-    private final String TAG = "laocuo";
     private final boolean showDebugPoints = false;
 
+    private int duration = DURATION;
     private int width, height;
     private int ovalW, ovalH, a, b, gap;
     private RectF mOval, mOvalLine;
@@ -29,7 +32,14 @@ public class Drip extends View implements ValueAnimator.AnimatorUpdateListener, 
     private Paint mPaint, mPaintPoint, mPaintLine;
     private ValueAnimator mAnimator;
     private int bottom;
+
+    /*
+     * left,ritht 是两边的起始点
+     * left_x,right_x 是贝塞尔曲线参考点
+     * left_bottom,right_bottom 是两边的结束点
+     */
     private Point left, left_x, right, right_x, left_bottom, right_bottom;
+
     private DripListener mListener;
     private boolean isInit;
 
@@ -37,9 +47,10 @@ public class Drip extends View implements ValueAnimator.AnimatorUpdateListener, 
         void complete(Drip v);
     }
 
-    public Drip(Context context, int w) {
+    public Drip(Context context, int w, int s) {
         this(context, null);
         this.width = this.height = w;
+        duration = s;
     }
 
     public Drip(Context context, AttributeSet attrs) {
@@ -77,7 +88,7 @@ public class Drip extends View implements ValueAnimator.AnimatorUpdateListener, 
             right_x = new Point(width / 2, 0);
             right_bottom = new Point(width / 2, 0);
             mAnimator = ValueAnimator.ofInt(0, height);
-            mAnimator.setDuration(DURATION);
+            mAnimator.setDuration(duration);
             mAnimator.addUpdateListener(this);
             mAnimator.addListener(this);
             isInit = true;
@@ -106,12 +117,15 @@ public class Drip extends View implements ValueAnimator.AnimatorUpdateListener, 
         if (isInit == false) {
             return;
         }
+
+        //绘制水滴中的椭圆
         mOval.offsetTo((width-ovalW)/2, bottom - ovalH);
         LinearGradient mLG = new LinearGradient(mOval.centerX(), mOval.top, mOval.centerX(), mOval.bottom,
                 new int[]{Color.WHITE, Color.GRAY}, null , Shader.TileMode.CLAMP);
         mPaint.setShader(mLG);
         canvas.drawOval(mOval, mPaint);
 
+        //绘制水滴中反光的小弧线
         mOvalLine.offsetTo((width - mOvalLine.width())/2, bottom - ovalH + (ovalH - mOvalLine.height()) / 2);
         canvas.drawArc(mOvalLine, 20, 50, false, mPaintLine);
 
@@ -156,6 +170,7 @@ public class Drip extends View implements ValueAnimator.AnimatorUpdateListener, 
             right_bottom.y = gap_n + bottom - 2*a;
         }
 
+        //绘制水滴尾巴
         mPath.reset();
         mPath.moveTo(left.x, left.y);
         mPath.quadTo(left_x.x, left_x.y, left_bottom.x, left_bottom.y);
@@ -215,6 +230,7 @@ public class Drip extends View implements ValueAnimator.AnimatorUpdateListener, 
         invalidate();
     }
 
+    //水滴生成动画
     private void perfromAnim() {
         mAnimator.start();
     }
